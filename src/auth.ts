@@ -18,3 +18,10 @@ export class Username extends String {
  */
 export class Password extends String {
 }
+
+/**
+ * Simple type wrapper to help avoid mixing up passwords with other data stored
+ * in strings.
+ */
+export class Key extends String {
+}

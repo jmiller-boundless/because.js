@@ -8,7 +8,7 @@ import { InvalidObject } from "./errors";
 // HTTP request/response processing
 import { Host } from "./host";
 import { Method, URI, Body } from "./http";
-import { Username, Password } from "./auth";
+import { Username, Password, Key } from "./auth";
 import { Request } from "./request";
 import { Query } from "./query";
 import { Headers } from "./headers";
@@ -42,6 +42,11 @@ export class Frontend {
      * to this that it shouldn't require much effort from the user to get it.
      */
     public jwt: JWT | undefined;
+
+    /**
+    * Added as an alternative to JWT logins.
+    */
+    public key: Key | undefined;
 
     /**
      * Log instance used internally by the Frontend instance.
@@ -192,17 +197,24 @@ export class Frontend {
      * This should normally be preferred to ensure that tokens are locally
      * cached, avoid redundant HTTP requests, and provide better ease-of-use.
      */
-    async login(username: Username, password: Password) {
+    async login(username?: Username, password?: Password, key?: Key) {
         const frontend: TokenFrontend | undefined = this.tokens;
         let jwt: JWT | undefined;
-        if (frontend) {
-            jwt = await frontend.get_token(username, password);
-            this.jwt = jwt;
+        if(username!=undefined&&password!=undefined){
+          if (frontend) {
+              jwt = await frontend.get_token(username, password);
+              alert(jwt);
+              this.jwt = jwt;
+          }
+          else {
+              this.log.error("cannot login without token service loaded");
+          }
+          return jwt;
+        }else if(key!=undefined){
+          this.key = key;
+        }else{
+          this.log.error("Login requires either username and password or a key");
         }
-        else {
-            this.log.error("cannot login without token service loaded");
-        }
-        return jwt;
     }
 
     /**
