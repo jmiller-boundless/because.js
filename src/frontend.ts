@@ -8,7 +8,7 @@ import { InvalidObject } from "./errors";
 // HTTP request/response processing
 import { Host } from "./host";
 import { Method, URI, Body } from "./http";
-import { Username, Password, Key } from "./auth";
+import { Username, Password } from "./auth";
 import { Request } from "./request";
 import { Query } from "./query";
 import { Headers } from "./headers";
@@ -46,7 +46,7 @@ export class Frontend {
     /**
     * Added as an alternative to JWT logins.
     */
-    public key: Key | undefined;
+    public key: string | undefined;
 
     /**
      * Log instance used internally by the Frontend instance.
@@ -174,6 +174,7 @@ export class Frontend {
         headers?: Headers,
     ): Request {
         headers = this.enriched_headers(headers);
+        query = this.enriched_query(query);
         const url = `${this.host.url}/${uri}`;
         return new Request(method, url, query, body, headers);
     }
@@ -191,19 +192,30 @@ export class Frontend {
 
     }
 
+    private enriched_query(query?: Query){
+      const enriched: Query = (
+        query
+        ? query
+        : new Query()
+      );
+      if(this.key){
+        enriched.set("apikey",this.key);
+      }
+      return enriched;
+    }
+
     /**
      * Get a token and cache it on this instance for reuse.
      *
      * This should normally be preferred to ensure that tokens are locally
      * cached, avoid redundant HTTP requests, and provide better ease-of-use.
      */
-    async login(username?: Username, password?: Password, key?: Key) {
+    async login(username?: Username, password?: Password, key?: string) {
         const frontend: TokenFrontend | undefined = this.tokens;
         let jwt: JWT | undefined;
         if(username!=undefined&&password!=undefined){
           if (frontend) {
               jwt = await frontend.get_token(username, password);
-              alert(jwt);
               this.jwt = jwt;
           }
           else {
@@ -226,8 +238,10 @@ export class Frontend {
      */
     send(request: Request): Transfer {
         const headers = this.enriched_headers(request.headers);
+        const query = this.enriched_query(request.query);
         // TODO
         request.headers = headers;
+        request.query = query;
         this.log.debug("about to send", {"request": request});
         const transfer = this.client.send(request);
         return transfer;

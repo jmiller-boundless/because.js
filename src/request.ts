@@ -42,7 +42,7 @@ export class Request {
     readonly method: Method;
     _url: URL;
     readonly body: Body;
-    readonly query: Query;
+    query: Query;
     headers: Headers;
 
     // timeout is intentionally excluded, it's a performance issue

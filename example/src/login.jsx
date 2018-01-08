@@ -26,6 +26,7 @@ export default class Login extends Component {
         this.state = {
             state: "waiting",
             jwt: "",
+            key: "",
             username: "",
             password: "",
             error: {
@@ -40,6 +41,7 @@ export default class Login extends Component {
         // Ensure handle* methods have the right `this`
         this.handleUsernameChange = this.handleUsernameChange.bind(this);
         this.handlePasswordChange = this.handlePasswordChange.bind(this);
+        this.handleKeyChange = this.handleKeyChange.bind(this);
         this.handleSubmit = this.handleSubmit.bind(this);
         this.handleRequestClose = this.handleRequestClose.bind(this);
     }
@@ -55,7 +57,7 @@ export default class Login extends Component {
         this.setState({
             username: username,
             errors: {
-                username: username ? "" : "username is required",
+                username: username ? "" : "username is required if key is not set",
                 password: this.state.errors.password,
             }
         });
@@ -66,11 +68,21 @@ export default class Login extends Component {
         this.setState({
             password: password,
             errors: {
-                password: password ? "" : "password is required",
+                password: password ? "" : "password is required if key is not set",
                 username: this.state.errors.username,
             }
         });
     }
+    handleKeyChange(event) {
+        let key = event.target.value;
+        this.setState({
+            key: key,
+            errors: {
+                key: key ? "" : "key is required if username is not set",
+            }
+        });
+    }
+
 
     handleSubmit(event) {
         // Don't cause whole page refresh on errors.
@@ -81,13 +93,18 @@ export default class Login extends Component {
         // Do not issue any request unless overall validation passes
         let username = this.state.username;
         let password = this.state.password;
+        let key = this.state.key;
         if (!username || !password) {
-            this.setState({
-                state: "error",
-                error: {
-                    message: "need a valid username and password to log in."
-                }
-            });
+          if(!key){
+              this.setState({
+                  state: "error",
+                  error: {
+                      message: "need a valid key or username and password to log in."
+                  }
+              });
+          }else{
+            alert("key");
+          }
         }
         else {
             let bcs = this.props.bcs;
@@ -119,7 +136,7 @@ export default class Login extends Component {
             });
         }
 
-        // TODO: 
+        // TODO:
         // when entering bad credentials:
         // XML Parsing Error: no root element found
         // Location: https://api.test.boundlessgeo.io/v1/token/?username=fasufis&password=asufdi
@@ -152,7 +169,7 @@ export default class Login extends Component {
                     flexDirection: "column",
                 }}>
 
-                    {this.props.message && 
+                    {this.props.message &&
                         <div className="message">
                            {this.props.message}
                         </div>
@@ -184,9 +201,21 @@ export default class Login extends Component {
 
                     </label>
                     <br/>
+                    <label>
+                        <TextField
+                            type="text"
+                            name="key"
+                            style={textFieldStyle}
+                            errorText={this.state.errors.key}
+                            floatingLabelText="Boundless Connect Key"
+                            value={this.state.key}
+                            onChange={this.handleKeyChange}
+                        />
+                    </label>
+                    <br/>
                     <RaisedButton
                         type="submit"
-                        label="Log in" 
+                        label="Log in"
                         primary={true}
                         style={{
                             backgroundColor: "#558B2F"

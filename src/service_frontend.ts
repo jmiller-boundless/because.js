@@ -44,10 +44,17 @@ export class ServiceFrontend {
      */
     protected async need_login() {
         const jwt = this._frontend ? this._frontend.jwt : undefined;
+        const key = this._frontend ? this._frontend.key : undefined;
         if (!jwt || !jwt.token) {
+          if(key){
+            return key;
+          }else{
             throw new Error("not logged in");
+          }
+        }else{
+          return jwt;
         }
-        return jwt;
+
     }
 }
 
