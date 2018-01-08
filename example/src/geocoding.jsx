@@ -97,7 +97,7 @@ export default class Geocoding extends Component {
                 }
             });
         }
-        else if (!bcs.jwt) {
+        else if (!bcs.jwt&&!bcs.key) {
             this.setState({
                 state: "error",
                 error: {
@@ -127,7 +127,7 @@ export default class Geocoding extends Component {
                 this.setState({
                     state: "done",
                     message: (
-                        `successfully retrieved ${geocodes.length} geocode(s).` 
+                        `successfully retrieved ${geocodes.length} geocode(s).`
                     ),
                     geocodes: geocodes
                 });
@@ -163,7 +163,7 @@ export default class Geocoding extends Component {
                     flexDirection: "column",
                 }}>
 
-                    {this.props.message && 
+                    {this.props.message &&
                         <div className="message">
                            {this.props.message}
                         </div>
@@ -225,7 +225,7 @@ export default class Geocoding extends Component {
                 />
 
             <div className="geocodes">
-                {query_repr && 
+                {query_repr &&
                 <Subheader>
                     Geocodes for {query_repr}
                 </Subheader>

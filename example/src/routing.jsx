@@ -178,7 +178,7 @@ export default class Routing extends Component {
                 }
             });
         }
-        else if (!bcs.jwt) {
+        else if (!bcs.jwt&&!bcs.key) {
             this.setState({
                 state: "error",
                 error: {
@@ -262,7 +262,7 @@ export default class Routing extends Component {
                 display: "flex",
                 flexDirection: "column",
             }}>
-                {this.props.message && 
+                {this.props.message &&
                     <div className="message">
                         {this.props.message}
                     </div>
@@ -315,7 +315,7 @@ export default class Routing extends Component {
                 <RaisedButton
                     primary={true}
                     type="submit"
-                    label="Get Route" 
+                    label="Get Route"
                 />
             </form>
 
@@ -340,7 +340,7 @@ export default class Routing extends Component {
             />
 
             <div>
-                {query_repr && 
+                {query_repr &&
                 <Subheader>
                     Route {query_repr}
                 </Subheader>

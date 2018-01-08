@@ -111,7 +111,7 @@ export default class ReverseGeocoding extends Component {
                 message: "ensure the bcs prop is passed to this component."
             });
         }
-        else if (!bcs.jwt) {
+        else if (!bcs.jwt&&!bcs.key) {
             this.setState({
                 state: "error",
                 error: {
@@ -142,7 +142,7 @@ export default class ReverseGeocoding extends Component {
                 this.setState({
                     state: "done",
                     message: (
-                        `successfully retrieved ${geocodes.length} geocode(s).` 
+                        `successfully retrieved ${geocodes.length} geocode(s).`
                     ),
                     geocodes: geocodes
                 });
@@ -178,7 +178,7 @@ export default class ReverseGeocoding extends Component {
                     flexDirection: "column",
                 }}>
 
-                    {this.props.message && 
+                    {this.props.message &&
                         <div className="message">
                            {this.props.message}
                         </div>
@@ -254,7 +254,7 @@ export default class ReverseGeocoding extends Component {
             <div className="geocodes" style={{
                 whiteSpace: "nowrap",
             }}>
-                {query_repr && 
+                {query_repr &&
                 <Subheader>
                     Reverse geocodes for {query_repr}
                 </Subheader>

@@ -4,6 +4,7 @@ import { Username, Password } from "../../auth";
 import { ServiceFrontend } from "../../service_frontend";
 import { KeyService } from "./service";
 import { Frontend } from "../../frontend";
+import { parse_key_validate } from "./parse";
 
 
 /**
@@ -16,6 +17,30 @@ export class LoginError extends BecauseError {
 export class KeyFrontend extends ServiceFrontend {
     service: KeyService;
 
+    constructor (frontend: Frontend, host: Host) {
+        const service = new KeyService();
+        super(service, frontend, host);
+    }
+
+
+    /**
+     * Get a key and return it without other side effects.
+     */
+    async validate_key(key: string) {
+        // If Javascript consumers pass null values, don't propagate them.
+        if (!key) {
+            throw new LoginError("key is required");
+        }
+
+
+        const endpoint = this.service.endpoint("validate_key");
+        const request = endpoint.request(this.host.url, {
+            "key": encodeURIComponent(key as string),
+            "apikey":key
+        });
+        const response = await this.send(request);
+        return parse_key_validate(response);
+    }
 
 
 }

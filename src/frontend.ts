@@ -16,9 +16,11 @@ import { Client } from "./client";
 import { Transfer } from "./transfer";
 import { ServiceFrontend } from "./service_frontend";
 
-// We always use the token service for login
+// Token service or key service to login
 import { JWT } from "./services/token/jwt";
 import { TokenFrontend } from "./services/token/frontend";
+import { KeyValidateData } from "./services/key/parse";
+import { KeyFrontend } from "./services/key/frontend";
 
 // We may also use other services
 import { FrontendClass } from "./service_frontend";
@@ -46,7 +48,7 @@ export class Frontend {
     /**
     * Added as an alternative to JWT logins.
     */
-    public key: string | undefined;
+    public key: KeyValidateData | undefined;
 
     /**
      * Log instance used internally by the Frontend instance.
@@ -57,6 +59,11 @@ export class Frontend {
      * Implements the token service wrapper.
      */
     tokens: TokenFrontend;
+
+    /**
+     * Implements the key service wrapper.
+     */
+    keys: KeyFrontend;
 
     /**
      * Implements the basemap service wrapper.
@@ -121,10 +128,13 @@ export class Frontend {
         this.host = host;
         this.debug = debug || false;
         this.jwt = undefined;
+        this.key = undefined;
         this.log = new Log("because");
 
         // Always get a TokenFrontend so we can log in
         this.tokens = new TokenFrontend(this, host);
+
+        this.keys = new KeyFrontend(this,host);
 
         // Use the passed ServiceFrontends
         this.add_service_frontends(classes);
@@ -143,6 +153,9 @@ export class Frontend {
         // TODO: has to be a better way
         if (frontend instanceof TokenFrontend) {
             this.tokens = frontend;
+        }
+        else if(frontend instanceof KeyFrontend){
+          this.keys = frontend;
         }
         else if (frontend instanceof BasemapFrontend) {
             this.basemaps = frontend;
@@ -199,7 +212,7 @@ export class Frontend {
         : new Query()
       );
       if(this.key){
-        enriched.set("apikey",this.key);
+        enriched.set("apikey",this.key.key);
       }
       return enriched;
     }
@@ -212,7 +225,9 @@ export class Frontend {
      */
     async login(username?: Username, password?: Password, key?: string) {
         const frontend: TokenFrontend | undefined = this.tokens;
+        const keyfrontend: KeyFrontend | undefined = this.keys;
         let jwt: JWT | undefined;
+        let keyval: KeyValidateData | undefined;
         if(username!=undefined&&password!=undefined){
           if (frontend) {
               jwt = await frontend.get_token(username, password);
@@ -223,7 +238,10 @@ export class Frontend {
           }
           return jwt;
         }else if(key!=undefined){
-          this.key = key;
+          keyval = await keyfrontend.validate_key(key);
+          this.log.debug("keyval",keyval);
+          this.key = keyval;
+          return keyval;
         }else{
           this.log.error("Login requires either username and password or a key");
         }
@@ -242,6 +260,7 @@ export class Frontend {
         // TODO
         request.headers = headers;
         request.query = query;
+        this.log.debug("about to send", {"enriched query": query});
         this.log.debug("about to send", {"request": request});
         const transfer = this.client.send(request);
         return transfer;

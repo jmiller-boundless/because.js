@@ -14,6 +14,7 @@ import { NodeClient as Client } from "./flavors/node_es5";
 // The Because class "ships" with everything loaded on it
 import { FrontendClass } from "./service_frontend";
 import { TokenFrontend } from "./services/token/frontend";
+import { KeyFrontend } from "./services/key/frontend";
 import { RoutingFrontend } from "./services/routing/frontend";
 import { BasemapFrontend } from "./services/basemap/frontend";
 import { GeocodingFrontend } from "./services/geocoding/frontend";
@@ -35,6 +36,7 @@ export class Because extends Frontend {
         }
         const classes: {[name: string]: FrontendClass} = {
             "tokens": TokenFrontend,
+            "keys": KeyFrontend,
             "routing": RoutingFrontend,
             "geocode": GeocodingFrontend,
             "basemap": BasemapFrontend,

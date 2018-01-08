@@ -103,7 +103,34 @@ export default class Login extends Component {
                   }
               });
           }else{
-            alert("key");
+            let bcs = this.props.bcs;
+            this.setState({
+                error: {},
+                state: "started",
+                query: {
+                    key: key
+                },
+            });
+            let promise = bcs.login(undefined, undefined,key);
+            promise
+            .then((keyval) => {
+                this.setState({
+                    state: "done",
+                    query:{username: keyval.organization}
+                });
+                console.log("login: success", keyval);
+
+                // This is only for playing around in the console.
+                window.keyval = keyval;
+            })
+            .catch((error) => {
+                console.log("login: failure", error);
+                window.error = error;
+                this.setState({
+                    state: "error",
+                    error: error
+                });
+            });
           }
         }
         else {
@@ -147,7 +174,13 @@ export default class Login extends Component {
 
     render() {
         let bcs = this.props.bcs;
-        let roles = bcs.jwt ? bcs.jwt.roles : [];
+        let roles = [];
+        if(bcs.jwt){
+          roles = bcs.jwt.roles;
+        }else if(bcs.key){
+          roles = bcs.key.roles;
+        }
+        //let roles = bcs.jwt ? bcs.jwt.roles : [];
         let roleList = dedupe(roles).map(
             (role) => {
                 return <ListItem
