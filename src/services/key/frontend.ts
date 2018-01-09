@@ -4,7 +4,7 @@ import { Username, Password } from "../../auth";
 import { ServiceFrontend } from "../../service_frontend";
 import { KeyService } from "./service";
 import { Frontend } from "../../frontend";
-import { parse_key_validate } from "./parse";
+import { parse_key_validate,parse_Organization,parse_Organizations } from "./parse";
 
 
 /**
@@ -40,6 +40,13 @@ export class KeyFrontend extends ServiceFrontend {
         });
         const response = await this.send(request);
         return parse_key_validate(response);
+    }
+
+    async get_organizations(){
+      const endpoint = this.service.endpoint("get_organizations");
+      const request = endpoint.request(this.host.url);
+      const response = await this.send(request);
+      return parse_Organizations(response);
     }
 
 

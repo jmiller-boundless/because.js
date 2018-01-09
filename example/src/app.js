@@ -9,6 +9,7 @@ import ReverseGeocoding from './reverse_geocoding';
 import Search from './search';
 //import DataSearch from './data_search';
 import { Basemap } from './basemap';
+import KeyManage from './keymanage';
 
 // material-ui stuff
 import MuiThemeProvider from 'material-ui/styles/MuiThemeProvider';
@@ -63,7 +64,7 @@ class App extends Component {
 
                             <p>
                             Log in here first. Most of the other demos require
-                        a login. 
+                        a login.
                             </p>
 
                             <p>
@@ -123,7 +124,7 @@ class App extends Component {
             >
                 <div className="tabContent">
                 <Geocoding
-                    bcs={this.state.bcs} 
+                    bcs={this.state.bcs}
                     message={
                         <div>
                         <p>
@@ -157,7 +158,7 @@ class App extends Component {
                         for null island (0, 0).
                         </p>
                         </div>
-                    }                             
+                    }
                 />
         </div>
             </Tab>
@@ -178,7 +179,7 @@ class App extends Component {
                         <code>because.js</code> are working just fine.
                         </p>
                         </div>
-                    }                            
+                    }
                 />
                 </div>
             </Tab>
@@ -205,6 +206,21 @@ class App extends Component {
                     }
                 />
         </div>
+            </Tab>
+            <Tab className="tab" value="keymanage" label="Manage Keys"
+            >
+                <div className="tabContent">
+                <KeyManage
+                    bcs={this.state.bcs}
+                    message={
+                        <div>
+                        <p>
+                        Manage BCS API keys.
+                        </p>
+                        </div>
+                    }
+                />
+                </div>
             </Tab>
         </Tabs>
 

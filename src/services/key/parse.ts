@@ -1,6 +1,6 @@
 import { BecauseError } from "../../errors";
 import { Response } from "../../response";
-import { parse_response } from "../../parse";
+import { parse_response,parse_array } from "../../parse";
 
 /**
  * Structure of JSON body of key validate responses.
@@ -62,6 +62,26 @@ export class Organization{
     public members: User[],
     public administrators: User[],
     public apiKeys: ApiKey[],
+    public errorCode: number| undefined,
+    public errorMessage: string| undefined
+  ){
+
+  }
+}
+
+export class WrappedOrganization{
+  constructor(
+    public value: Organization,
+    public errorCode: number| undefined,
+    public errorMessage: string| undefined
+  ){
+
+  }
+}
+
+export class WrappedOrganizations{
+  constructor(
+    public value: Organization[],
     public errorCode: number| undefined,
     public errorMessage: string| undefined
   ){
@@ -148,4 +168,53 @@ export function parse_Organization(response: Response): Organization{
     data.errorMessage
   );
 
+}
+
+export function parse_Organizations(response: Response): Organization[] {
+    const records = parse_response<WrappedOrganizations>(response);
+    return records.value.map((data) => {
+      const members = [];
+      for (const memberdata of data.members) {
+          const memberroles = [];
+          for(const memberrole of memberdata.roles){
+            const role = new UserRole(memberrole.id,memberrole.key,memberrole.description);
+            memberroles.push(role);
+          }
+          const member = new User(memberdata.id,memberdata.email,memberroles,memberdata.created,memberdata.parentOrganizationId);
+          members.push(member);
+      }
+
+      const administrators = [];
+      for (const administordata of data.administrators) {
+          const adminroles = [];
+          for(const adminrole of administordata.roles){
+            const role = new UserRole(adminrole.id,adminrole.key,adminrole.description);
+            adminroles.push(role);
+          }
+          const administrator = new User(administordata.id,administordata.email,adminroles,administordata.created,administordata.parentOrganizationId);
+          administrators.push(administrator);
+      }
+
+      const apiKeys = [];
+      for (const apikeydata of data.apiKeys){
+        const roles = [];
+        for (const role_data of apikeydata.authorizedRoles) {
+            const role = new UserRole(role_data.id,role_data.key,role_data.description);
+            roles.push(role);
+        }
+        const key = new ApiKey(
+          apikeydata.id,apikeydata.key,apikeydata.created,apikeydata.expires,roles,apikeydata.parentOrganizationId,apikeydata.errorCode,apikeydata.errorMessage);
+        apiKeys.push(key);
+      }
+      return new Organization(
+        data.id,
+        data.name,
+        data.created,
+        members,
+        administrators,
+        apiKeys,
+        data.errorCode,
+        data.errorMessage
+      );
+    });
 }
