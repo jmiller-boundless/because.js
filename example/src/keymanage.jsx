@@ -2,6 +2,90 @@ import React, { Component } from "react";
 import SelectField from 'material-ui/SelectField';
 import MenuItem from 'material-ui/MenuItem';
 import RaisedButton from 'material-ui/RaisedButton';
+import {List,ListItem} from 'material-ui/List';
+import Moment from 'moment';
+
+function dedupe(items) {
+    var seen = {};
+    var result = [];
+    for (let item of items) {
+        if (!seen[item.description]) {
+            result.push(item);
+        }
+        seen[item.description] = true;
+    }
+    return result;
+}
+
+function renderOrgMetadata(orgs) {
+    console.log("orgs",orgs);
+    if (!orgs||orgs.length<1) {
+        return undefined;
+    }
+    let org = orgs[0];
+    return (
+        <ListItem
+            disabled={true}
+            primaryText={
+            <div>
+                <span>
+                    Organization: {org.name}
+                </span>
+                <br/>
+                <span>Created: {Moment.unix(org.created/1000).format('dddd, MMMM Do, YYYY h:mm:ss A')}</span>
+                <br/>
+                <span>Id: {org.id}</span>
+            </div>
+            }
+            key={org.id}
+            className="result"
+        >
+        </ListItem>
+    );
+}
+
+function renderKeyMetadata(keys) {
+    console.log("keys",keys);
+    if (!keys||keys.length<1) {
+        return undefined;
+    }
+    let key = keys[0];
+    let roleList = dedupe(key.authorizedRoles).map(
+        (role) => {
+            return <ListItem
+                disabled={true}
+                key={role.description}
+            >
+                {role.description}
+            </ListItem>;
+        }
+    );
+    console.log("rolelist",roleList);
+    return (
+        <ListItem
+            disabled={true}
+            primaryText={
+            <div>
+                <span>
+                    Key: {key.key}
+                </span>
+                <br/>
+                <span>Id: {key.id}</span>
+                <br/>
+                <span>Created: {Moment.unix(key.created/1000).format('dddd, MMMM Do, YYYY h:mm:ss A')}</span>
+                <br/>
+                <span>Expires: {Moment.unix(key.expires/1000).format('dddd, MMMM Do, YYYY h:mm:ss A')}</span>
+                <br/>
+                <span>Roles: {roleList}</span>
+            </div>
+            }
+            key={key.key}
+            className="result"
+        >
+        </ListItem>
+
+    );
+}
 
 export default class KeyManage extends Component {
   constructor (props) {
@@ -10,15 +94,21 @@ export default class KeyManage extends Component {
           error:  {
               message: "",
           },
-    errors: {
+          errors: {
               text: "",
           },
           query: undefined,
           state: "waiting",
           organization: "ALL",
           organizations: {
-              "ALL": "Any",
+              "ALL": "ALL",
           },
+          apikey: "",
+          apikeys: {
+            "ALL": "ALL"
+          },
+          keydata: [],
+          organizationdata:[],
           text: "geoserver",
           results: [],
       };
@@ -27,6 +117,8 @@ export default class KeyManage extends Component {
       this.handleSubmit = this.handleSubmit.bind(this);
       this.updateOrganizations = this.updateOrganizations.bind(this);
       this.handleOrganizationChange = this.handleOrganizationChange.bind(this);
+      this.handleApiKeyChange = this.handleApiKeyChange.bind(this);
+      this.updateApiKeys = this.updateApiKeys.bind(this);
   }
 
   handleTextChange(event) {
@@ -42,6 +134,12 @@ export default class KeyManage extends Component {
       this.setState({
           organization: selected
       });
+      this.updateApiKeys(selected);
+  }
+  handleApiKeyChange(event, index, selected) {
+      this.setState({
+          apikey: selected
+      });
   }
   handleSubmit(event) {
       // Don't cause whole page refresh on errors.
@@ -51,17 +149,32 @@ export default class KeyManage extends Component {
   updateOrganizations() {
       let bcs = this.props.bcs;
       let promise = bcs.keys.get_organizations();
+      let keyhldr = [];
       promise.then((result) => {
           const one = {};
           for (let record of result) {
             one[record.id] = record.name;
+            keyhldr.push(...record.apiKeys)
           }
           one["ALL"] = "Any";
           console.log("one: ", one);
           this.setState({
               organizations: one,
+              keydata: keyhldr,
+              organizationdata: result
           });
       });
+  }
+  updateApiKeys(organizationid){
+    let orgkeys = this.state.keydata.filter(key => key.parentOrganizationId.toString()===organizationid);
+    const one = {};
+    for (let orgkey of orgkeys){
+      one[orgkey.id] = orgkey.key;
+    }
+    this.setState({
+      apikeys: one
+    });
+    console.log("state.apikeys",orgkeys);
   }
 
   render() {
@@ -81,7 +194,24 @@ export default class KeyManage extends Component {
       }
       return organization_options;
   }
+
+  function createKeyItems(apikeys) {
+      let key_options = [];
+      let key_keys = Object.keys(apikeys);
+      for (let key of key_keys) {
+          let value = apikeys[key];
+          let item = (
+              <MenuItem
+                  key={key}
+                  value={key}
+                  primaryText={value} />
+          );
+          key_options.push(item);
+      }
+      return key_options;
+  }
     let organizationItems = createOrganizationItems(this.state.organizations);
+    let apikeyItems = createKeyItems(this.state.apikeys);
     return (
     <div style={{
         display: "flex",
@@ -99,6 +229,14 @@ export default class KeyManage extends Component {
           }
 
           <br/>
+          <RaisedButton
+              style={{
+                  marginTop: "1em",
+              }}
+              primary={true}
+              onClick={this.updateOrganizations}
+              label="Get Organizations"
+          />
           <label>
               <SelectField
                   floatingLabelText="Organization"
@@ -108,15 +246,23 @@ export default class KeyManage extends Component {
                 {organizationItems}
               </SelectField>
           </label>
-          <RaisedButton
-              style={{
-                  marginTop: "1em",
-              }}
-              primary={true}
-              onClick={this.updateOrganizations}
-              label="Get Organizations"
-          />
+
+          <label>
+              <SelectField
+                  floatingLabelText="API Key"
+                  value={this.state.apikey}
+                  onChange={this.handleApiKeyChange}
+              >
+                {apikeyItems}
+              </SelectField>
+          </label>
       </form>
+      <div className="results">
+        <List>
+            {renderOrgMetadata(this.state.organizationdata.filter(org => org.id.toString()===this.state.organization))}
+            {renderKeyMetadata(this.state.keydata.filter(key => key.id.toString()===this.state.apikey))}
+        </List>
+      </div>
     </div>
     );
   }
