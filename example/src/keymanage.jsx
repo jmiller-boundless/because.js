@@ -111,6 +111,8 @@ export default class KeyManage extends Component {
           organizationdata:[],
           text: "geoserver",
           results: [],
+          multiroles: [],
+          rolesItems: []
       };
       // Ensure handle* methods have the right `this`
       this.handleTextChange = this.handleTextChange.bind(this);
@@ -119,6 +121,13 @@ export default class KeyManage extends Component {
       this.handleOrganizationChange = this.handleOrganizationChange.bind(this);
       this.handleApiKeyChange = this.handleApiKeyChange.bind(this);
       this.updateApiKeys = this.updateApiKeys.bind(this);
+      this.createApiKey = this.createApiKey.bind(this);
+      this.handleRolesChange = this.handleRolesChange.bind(this);
+      this.updateRoles = this.updateRoles.bind(this);
+  }
+
+  createApiKey(){
+    console.log("creating key function");
   }
 
   handleTextChange(event) {
@@ -135,15 +144,36 @@ export default class KeyManage extends Component {
           organization: selected
       });
       this.updateApiKeys(selected);
+      this.updateRoles();
   }
   handleApiKeyChange(event, index, selected) {
       this.setState({
           apikey: selected
       });
   }
+  handleRolesChange(event, index, selected){
+    this.setState({
+      multiroles: selected
+    });
+    console.log("multiroles",this.state.multiroles);
+  }
   handleSubmit(event) {
       // Don't cause whole page refresh on errors.
       event.preventDefault();
+  }
+
+  updateRoles(){
+    let bcs = this.props.bcs;
+    let promise = bcs.keys.get_roles();
+    promise.then((result) => {
+      const one = {};
+      for (let record of result) {
+        one[record.id] = record.description;
+      }
+      this.setState({
+          rolesItems: one,
+      });
+    });
   }
 
   updateOrganizations() {
@@ -212,6 +242,7 @@ export default class KeyManage extends Component {
   }
     let organizationItems = createOrganizationItems(this.state.organizations);
     let apikeyItems = createKeyItems(this.state.apikeys);
+    let rolesItems = createKeyItems(this.state.rolesItems);
     return (
     <div style={{
         display: "flex",
@@ -256,6 +287,24 @@ export default class KeyManage extends Component {
                 {apikeyItems}
               </SelectField>
           </label>
+          <label>
+              <SelectField
+                  multiple={true}
+                  floatingLabelText="Roles"
+                  value={this.state.multiroles}
+                  onChange={this.handleRolesChange}
+              >
+                {rolesItems}
+              </SelectField>
+          </label>
+          <RaisedButton
+              style={{
+                  marginTop: "1em",
+              }}
+              primary={true}
+              onClick={this.createApiKey}
+              label="Create New API Key"
+          />
       </form>
       <div className="results">
         <List>
@@ -263,6 +312,7 @@ export default class KeyManage extends Component {
             {renderKeyMetadata(this.state.keydata.filter(key => key.id.toString()===this.state.apikey))}
         </List>
       </div>
+
     </div>
     );
   }

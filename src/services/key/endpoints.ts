@@ -56,6 +56,9 @@ export const endpoints = {
         "name":args.name
       });
     }
+  ),
+  "get_roles": new Endpoint(
+    "GET","/auth/admin/get-roles"
   )
 
 

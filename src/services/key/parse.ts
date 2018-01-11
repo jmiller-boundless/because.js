@@ -89,6 +89,16 @@ export class WrappedOrganizations{
   }
 }
 
+export class WrappedRoles{
+  constructor(
+    public value: UserRole[],
+    public errorCode: number| undefined,
+    public errorMessage: string| undefined
+  ){
+
+  }
+}
+
 export function parse_key_validate(response: Response): KeyValidateData {
     const data = parse_response<KeyValidateData>(response);
     // The envelope is irrelevant after we've checked for an error
@@ -168,6 +178,13 @@ export function parse_Organization(response: Response): Organization{
     data.errorMessage
   );
 
+}
+
+export function parse_roles(response: Response): UserRole[]{
+  const records = parse_response<WrappedRoles>(response);
+  return records.value.map((data) => {
+    return new UserRole(data.id,data.key,data.description);
+  });
 }
 
 export function parse_Organizations(response: Response): Organization[] {

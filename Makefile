@@ -13,7 +13,7 @@ all: node_modules test distfiles doc/build es2015 lib
 
 # node_modules/ holds build dependencies and dependencies to be linked in.
 node_modules: package.json
-	yarn install
+	yarn install --ignore-engines
 	@touch node_modules
 
 $(BIN): node_modules
