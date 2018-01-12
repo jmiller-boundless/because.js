@@ -4,6 +4,7 @@ import MenuItem from 'material-ui/MenuItem';
 import RaisedButton from 'material-ui/RaisedButton';
 import {List,ListItem} from 'material-ui/List';
 import Moment from 'moment';
+import NumberInput from 'material-ui-number-input';
 
 function dedupe(items) {
     var seen = {};
@@ -112,7 +113,9 @@ export default class KeyManage extends Component {
           text: "geoserver",
           results: [],
           multiroles: [],
-          rolesItems: []
+          rolesItems: [],
+          expireunit:"",
+          expirequant:1
       };
       // Ensure handle* methods have the right `this`
       this.handleTextChange = this.handleTextChange.bind(this);
@@ -124,7 +127,45 @@ export default class KeyManage extends Component {
       this.createApiKey = this.createApiKey.bind(this);
       this.handleRolesChange = this.handleRolesChange.bind(this);
       this.updateRoles = this.updateRoles.bind(this);
+      this.handleExpireUnitChange = this.handleExpireUnitChange.bind(this);
+      this.handleExpireQuantChange = this.handleExpireQuantChange.bind(this);
+      this.onError = this.onError.bind(this);
   }
+
+  onError = (error) => {
+    let errorText;
+    console.log(error);
+    switch (error) {
+      case 'required':
+        errorText = 'This field is required';
+        break;
+      case 'invalidSymbol':
+        errorText = 'You are tring to enter none number symbol';
+        break;
+      case 'incompleteNumber':
+        errorText = 'Number is incomplete';
+        break;
+      case 'singleMinus':
+        errorText = 'Minus can be use only for negativity';
+        break;
+      case 'singleFloatingPoint':
+        errorText = 'There is already a floating point';
+        break;
+      case 'singleZero':
+        errorText = 'Floating point is expected';
+        break;
+      case 'min':
+        errorText = 'You are tring to enter number less than 1';
+        break;
+      case 'max':
+          errorText = 'You are tring to enter number greater than 100';
+          break;
+      default:
+          errorText='';
+          break;
+      }
+      this.setState({ error:{message: errorText }});
+    };
 
   createApiKey(){
     console.log("creating key function");
@@ -149,6 +190,17 @@ export default class KeyManage extends Component {
   handleApiKeyChange(event, index, selected) {
       this.setState({
           apikey: selected
+      });
+  }
+  handleExpireUnitChange(event, index, selected) {
+      this.setState({
+          expireunit: selected
+      });
+  }
+  handleExpireQuantChange(event) {
+    var text = event.target.value;
+      this.setState({
+          expirequant: text
       });
   }
   handleRolesChange(event, index, selected){
@@ -243,6 +295,8 @@ export default class KeyManage extends Component {
     let organizationItems = createOrganizationItems(this.state.organizations);
     let apikeyItems = createKeyItems(this.state.apikeys);
     let rolesItems = createKeyItems(this.state.rolesItems);
+    let expireunits = createKeyItems(["DAY", "WEEK", "MONTH", "YEAR"]);
+    let expirequant = this.state.expirequant;
     return (
     <div style={{
         display: "flex",
@@ -296,6 +350,28 @@ export default class KeyManage extends Component {
               >
                 {rolesItems}
               </SelectField>
+          </label>
+          <label>
+              <SelectField
+                  floatingLabelText="Expire Unit"
+                  value={this.state.expireunit}
+                  onChange={this.handleExpireUnitChange}
+              >
+                {expireunits}
+              </SelectField>
+          </label>
+          <label>
+
+          <NumberInput
+                  id="expirequant"
+                  value={expirequant}
+                  min={1}
+                  max={100}
+                  strategy="warn"
+                  onError={this.onError}
+                  errorText={this.state.error.message}
+                  onChange={this.handleExpireQuantChange}
+           />
           </label>
           <RaisedButton
               style={{
