@@ -115,7 +115,7 @@ export default class KeyManage extends Component {
           multiroles: [],
           rolesItems: [],
           expireunit:"",
-          expirequant:1
+          expirequant:"1"
       };
       // Ensure handle* methods have the right `this`
       this.handleTextChange = this.handleTextChange.bind(this);
@@ -199,6 +199,7 @@ export default class KeyManage extends Component {
   }
   handleExpireQuantChange(event) {
     var text = event.target.value;
+    console.log("expirequant",text);
       this.setState({
           expirequant: text
       });
@@ -296,7 +297,6 @@ export default class KeyManage extends Component {
     let apikeyItems = createKeyItems(this.state.apikeys);
     let rolesItems = createKeyItems(this.state.rolesItems);
     let expireunits = createKeyItems(["DAY", "WEEK", "MONTH", "YEAR"]);
-    let expirequant = this.state.expirequant;
     return (
     <div style={{
         display: "flex",
@@ -364,7 +364,7 @@ export default class KeyManage extends Component {
 
           <NumberInput
                   id="expirequant"
-                  value={expirequant}
+                  value={this.state.expirequant}
                   min={1}
                   max={100}
                   strategy="warn"
