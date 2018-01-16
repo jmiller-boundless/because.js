@@ -173,11 +173,18 @@ export default class KeyManage extends Component {
     const expirequantity = this.state.expirequant;
     const expireunit = this.state.expireunit;
     const roles = this.state.multiroles.join();
-
+    let that = this;
     let bcs = this.props.bcs;
-    let promise = bcs.keys.create_key(orgid,expirequantity,expireunit,roles);
+    let promise = bcs.keys.create_key(orgid,parseInt(expirequantity,10),expireunit,roles);
     promise.then((result) => {
       console.log("key create result",result);
+      if(!result.errorCode&&!result.errorMessage&&result.key){
+        that.updateOrganizations();
+        that.setState({
+          organization:result.parentOrganizationId.toString(),
+          apikey:result.id.toString()
+        });
+      }
     });
   }
 
@@ -198,6 +205,7 @@ export default class KeyManage extends Component {
       this.updateRoles();
   }
   handleApiKeyChange(event, index, selected) {
+      console.log("hakc selected",selected);
       this.setState({
           apikey: selected
       });
@@ -267,7 +275,7 @@ export default class KeyManage extends Component {
     this.setState({
       apikeys: one
     });
-    console.log("state.apikeys",orgkeys);
+    console.log("state.apikeys",one);
   }
 
   render() {
