@@ -110,20 +110,20 @@ export class WrappedKey{
 }
 
 export function parse_wrapped_key(response: Response): ApiKey {
-    const data = parse_response<ApiKey>(response);
+    const data = parse_response<WrappedKey>(response);
     const roles = [];
-    for (const role_data of data.authorizedRoles) {
+    for (const role_data of data.value.authorizedRoles) {
         const role = new UserRole(role_data.id,role_data.key,role_data.description);
         roles.push(role);
     }
 
         return new ApiKey(
-          data.id,
-          data.key,
-          data.created,
-          data.expires,
+          data.value.id,
+          data.value.key,
+          data.value.created,
+          data.value.expires,
           roles,
-          data.parentOrganizationId,
+          data.value.parentOrganizationId,
           data.errorCode,
           data.errorMessage
         );

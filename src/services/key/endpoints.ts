@@ -14,7 +14,9 @@ export const endpoints = {
   "create_key": new Endpoint(
     "POST", "/auth/admin/create-apikey",
     undefined,
-    undefined,
+    new Headers({
+        "Content-Type": "application/json",
+    }),
     (args) => {
       return JSON.stringify({
         "organizationId":args.organizationId,

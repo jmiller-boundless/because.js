@@ -169,6 +169,16 @@ export default class KeyManage extends Component {
 
   createApiKey(){
     console.log("creating key function");
+    const orgid = this.state.organization;
+    const expirequantity = this.state.expirequant;
+    const expireunit = this.state.expireunit;
+    const roles = this.state.multiroles.join();
+
+    let bcs = this.props.bcs;
+    let promise = bcs.keys.create_key(orgid,expirequantity,expireunit,roles);
+    promise.then((result) => {
+      console.log("key create result",result);
+    });
   }
 
   handleTextChange(event) {
@@ -221,7 +231,7 @@ export default class KeyManage extends Component {
     promise.then((result) => {
       const one = {};
       for (let record of result) {
-        one[record.id] = record.description;
+        one[record.key] = record.description;
       }
       this.setState({
           rolesItems: one,
@@ -293,10 +303,23 @@ export default class KeyManage extends Component {
       }
       return key_options;
   }
+  function createExpireUnitItems(expireunits) {
+      let key_options = [];
+      for (let key of expireunits) {
+          let item = (
+              <MenuItem
+                  key={key}
+                  value={key}
+                  primaryText={key} />
+          );
+          key_options.push(item);
+      }
+      return key_options;
+  }
     let organizationItems = createOrganizationItems(this.state.organizations);
     let apikeyItems = createKeyItems(this.state.apikeys);
     let rolesItems = createKeyItems(this.state.rolesItems);
-    let expireunits = createKeyItems(["DAY", "WEEK", "MONTH", "YEAR"]);
+    let expireunits = createExpireUnitItems(["DAY", "WEEK", "MONTH", "YEAR"]);
     return (
     <div style={{
         display: "flex",
@@ -360,7 +383,7 @@ export default class KeyManage extends Component {
                 {expireunits}
               </SelectField>
           </label>
-          <label for="expirequant">
+          <label htmlFor="expirequant">
           <NumberInput
                   id="expirequant"
                   value={this.state.expirequant}
