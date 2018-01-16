@@ -360,8 +360,7 @@ export default class KeyManage extends Component {
                 {expireunits}
               </SelectField>
           </label>
-          <label>
-
+          <label for="expirequant">
           <NumberInput
                   id="expirequant"
                   value={this.state.expirequant}
@@ -372,6 +371,7 @@ export default class KeyManage extends Component {
                   errorText={this.state.error.message}
                   onChange={this.handleExpireQuantChange}
            />
+                  Expire Quantity
           </label>
           <RaisedButton
               style={{

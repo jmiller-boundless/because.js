@@ -1330,6 +1330,27 @@ var KeyFrontend = (function (_super) {
             });
         });
     };
+    KeyFrontend.prototype.create_key = function (orgid, expirequantity, expireunit, roles) {
+        return __awaiter(this, void 0, void 0, function () {
+            var endpoint, request, response;
+            return __generator(this, function (_a) {
+                switch (_a.label) {
+                    case 0:
+                        endpoint = this.service.endpoint("create_key");
+                        request = endpoint.request(this.host.url, {
+                            "organizationId": orgid,
+                            "expireQuantity": expirequantity,
+                            "expireUnit": expireunit,
+                            "roles": roles
+                        });
+                        return [4, this.send(request)];
+                    case 1:
+                        response = _a.sent();
+                        return [2, parse_1.parse_wrapped_key(response)];
+                }
+            });
+        });
+    };
     return KeyFrontend;
 }(service_frontend_1.ServiceFrontend));
 exports.KeyFrontend = KeyFrontend;
@@ -2979,8 +3000,8 @@ exports.endpoints = {
         return JSON.stringify({
             "organizationId": args.organizationId,
             "expireQuantity": args.expireQuantity,
-            "expireUnit": args.expireQuantity,
-            "roles": args.roles
+            "expireUnit": args.expireUnit,
+            "roles": args.roles.toString().split(',')
         });
     }),
     "update_key": new service_1.Endpoint("POST", "/auth/admin/update-apikey", undefined, undefined, function (args) {
@@ -3098,6 +3119,26 @@ var WrappedRoles = (function () {
     return WrappedRoles;
 }());
 exports.WrappedRoles = WrappedRoles;
+var WrappedKey = (function () {
+    function WrappedKey(value, errorCode, errorMessage) {
+        this.value = value;
+        this.errorCode = errorCode;
+        this.errorMessage = errorMessage;
+    }
+    return WrappedKey;
+}());
+exports.WrappedKey = WrappedKey;
+function parse_wrapped_key(response) {
+    var data = parse_1.parse_response(response);
+    var roles = [];
+    for (var _i = 0, _a = data.authorizedRoles; _i < _a.length; _i++) {
+        var role_data = _a[_i];
+        var role = new UserRole(role_data.id, role_data.key, role_data.description);
+        roles.push(role);
+    }
+    return new ApiKey(data.id, data.key, data.created, data.expires, roles, data.parentOrganizationId, data.errorCode, data.errorMessage);
+}
+exports.parse_wrapped_key = parse_wrapped_key;
 function parse_key_validate(response) {
     var data = parse_1.parse_response(response);
     return new KeyValidateData(data.organization, data.key, data.roles, data.errorCode, data.errorMessage);

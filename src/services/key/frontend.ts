@@ -4,7 +4,7 @@ import { Username, Password } from "../../auth";
 import { ServiceFrontend } from "../../service_frontend";
 import { KeyService } from "./service";
 import { Frontend } from "../../frontend";
-import { parse_key_validate,parse_Organization,parse_Organizations,parse_roles } from "./parse";
+import { parse_key_validate,parse_Organization,parse_Organizations,parse_roles,parse_wrapped_key } from "./parse";
 
 
 /**
@@ -54,6 +54,20 @@ export class KeyFrontend extends ServiceFrontend {
       const request = endpoint.request(this.host.url);
       const response = await this.send(request);
       return parse_roles(response);
+    }
+
+    async create_key(orgid: string,expirequantity: number,expireunit: string,roles: string){
+      const endpoint = this.service.endpoint("create_key");
+      const request = endpoint.request(this.host.url,{
+        "organizationId":orgid,
+        "expireQuantity":expirequantity,
+        "expireUnit":expireunit,
+        "roles":roles
+      });
+
+      const response = await this.send(request);
+      return parse_wrapped_key(response);
+
     }
 
 

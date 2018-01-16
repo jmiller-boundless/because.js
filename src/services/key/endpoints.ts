@@ -19,8 +19,8 @@ export const endpoints = {
       return JSON.stringify({
         "organizationId":args.organizationId,
         "expireQuantity":args.expireQuantity,
-        "expireUnit":args.expireQuantity,
-        "roles":args.roles
+        "expireUnit":args.expireUnit,
+        "roles":args.roles.toString().split(',')
       });
     }
   ),

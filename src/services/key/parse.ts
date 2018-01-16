@@ -99,6 +99,36 @@ export class WrappedRoles{
   }
 }
 
+export class WrappedKey{
+  constructor(
+    public value: ApiKey,
+    public errorCode: number| undefined,
+    public errorMessage: string| undefined
+  ){
+
+  }
+}
+
+export function parse_wrapped_key(response: Response): ApiKey {
+    const data = parse_response<ApiKey>(response);
+    const roles = [];
+    for (const role_data of data.authorizedRoles) {
+        const role = new UserRole(role_data.id,role_data.key,role_data.description);
+        roles.push(role);
+    }
+
+        return new ApiKey(
+          data.id,
+          data.key,
+          data.created,
+          data.expires,
+          roles,
+          data.parentOrganizationId,
+          data.errorCode,
+          data.errorMessage
+        );
+}
+
 export function parse_key_validate(response: Response): KeyValidateData {
     const data = parse_response<KeyValidateData>(response);
     // The envelope is irrelevant after we've checked for an error
