@@ -1351,6 +1351,26 @@ var KeyFrontend = (function (_super) {
             });
         });
     };
+    KeyFrontend.prototype.create_organization = function (name) {
+        return __awaiter(this, void 0, void 0, function () {
+            var endpoint, d, request, response;
+            return __generator(this, function (_a) {
+                switch (_a.label) {
+                    case 0:
+                        endpoint = this.service.endpoint("create_organization");
+                        d = new Date();
+                        request = endpoint.request(this.host.url, {
+                            "name": name,
+                            "created": d.getTime() * 1000000
+                        });
+                        return [4, this.send(request)];
+                    case 1:
+                        response = _a.sent();
+                        return [2, parse_1.parse_wrapped_organization(response)];
+                }
+            });
+        });
+    };
     return KeyFrontend;
 }(service_frontend_1.ServiceFrontend));
 exports.KeyFrontend = KeyFrontend;
@@ -3007,6 +3027,14 @@ exports.endpoints = {
             "roles": args.roles.toString().split(',')
         });
     }),
+    "create_organization": new service_1.Endpoint("POST", "/auth/admin/create-organization", undefined, new headers_1.Headers({
+        "Content-Type": "application/json",
+    }), function (args) {
+        return JSON.stringify({
+            "name": args.name,
+            "created": args.created
+        });
+    }),
     "update_key": new service_1.Endpoint("POST", "/auth/admin/update-apikey", undefined, undefined, function (args) {
         return JSON.stringify({
             "id": args.id,
@@ -3142,6 +3170,47 @@ function parse_wrapped_key(response) {
     return new ApiKey(data.value.id, data.value.key, data.value.created, data.value.expires, roles, data.value.parentOrganizationId, data.errorCode, data.errorMessage);
 }
 exports.parse_wrapped_key = parse_wrapped_key;
+function parse_wrapped_organization(response) {
+    var data = parse_1.parse_response(response);
+    var members = [];
+    for (var _i = 0, _a = data.value.members; _i < _a.length; _i++) {
+        var memberdata = _a[_i];
+        var memberroles = [];
+        for (var _b = 0, _c = memberdata.roles; _b < _c.length; _b++) {
+            var memberrole = _c[_b];
+            var role = new UserRole(memberrole.id, memberrole.key, memberrole.description);
+            memberroles.push(role);
+        }
+        var member = new User(memberdata.id, memberdata.email, memberroles, memberdata.created, memberdata.parentOrganizationId);
+        members.push(member);
+    }
+    var administrators = [];
+    for (var _d = 0, _e = data.value.administrators; _d < _e.length; _d++) {
+        var administordata = _e[_d];
+        var adminroles = [];
+        for (var _f = 0, _g = administordata.roles; _f < _g.length; _f++) {
+            var adminrole = _g[_f];
+            var role = new UserRole(adminrole.id, adminrole.key, adminrole.description);
+            adminroles.push(role);
+        }
+        var administrator = new User(administordata.id, administordata.email, adminroles, administordata.created, administordata.parentOrganizationId);
+        administrators.push(administrator);
+    }
+    var apiKeys = [];
+    for (var _h = 0, _j = data.value.apiKeys; _h < _j.length; _h++) {
+        var apikeydata = _j[_h];
+        var roles = [];
+        for (var _k = 0, _l = apikeydata.authorizedRoles; _k < _l.length; _k++) {
+            var role_data = _l[_k];
+            var role = new UserRole(role_data.id, role_data.key, role_data.description);
+            roles.push(role);
+        }
+        var key = new ApiKey(apikeydata.id, apikeydata.key, apikeydata.created, apikeydata.expires, roles, apikeydata.parentOrganizationId, apikeydata.errorCode, apikeydata.errorMessage);
+        apiKeys.push(key);
+    }
+    return new Organization(data.value.id, data.value.name, data.value.created, members, administrators, apiKeys, data.errorCode, data.errorMessage);
+}
+exports.parse_wrapped_organization = parse_wrapped_organization;
 function parse_key_validate(response) {
     var data = parse_1.parse_response(response);
     return new KeyValidateData(data.organization, data.key, data.roles, data.errorCode, data.errorMessage);

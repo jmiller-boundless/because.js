@@ -5,6 +5,8 @@ import RaisedButton from 'material-ui/RaisedButton';
 import {List,ListItem} from 'material-ui/List';
 import Moment from 'moment';
 import NumberInput from 'material-ui-number-input';
+import TextField from 'material-ui/TextField';
+import { textFieldStyle } from './styles';
 
 function dedupe(items) {
     var seen = {};
@@ -115,7 +117,8 @@ export default class KeyManage extends Component {
           multiroles: [],
           rolesItems: [],
           expireunit:"",
-          expirequant:"1"
+          expirequant:"1",
+          organizationname:""
       };
       // Ensure handle* methods have the right `this`
       this.handleTextChange = this.handleTextChange.bind(this);
@@ -130,6 +133,8 @@ export default class KeyManage extends Component {
       this.handleExpireUnitChange = this.handleExpireUnitChange.bind(this);
       this.handleExpireQuantChange = this.handleExpireQuantChange.bind(this);
       this.onError = this.onError.bind(this);
+      this.createOrganization = this.createOrganization.bind(this);
+      this.handleOrgNameChange = this.handleOrgNameChange.bind(this);
   }
 
   onError = (error) => {
@@ -183,6 +188,23 @@ export default class KeyManage extends Component {
         that.setState({
           organization:result.parentOrganizationId.toString(),
           apikey:result.id.toString()
+        });
+      }
+    });
+  }
+
+  createOrganization(){
+    console.log("creating organization function");
+    const name = this.state.organizationname;
+    let that = this;
+    let bcs = this.props.bcs;
+    let promise = bcs.keys.create_organization(name);
+    promise.then((result) => {
+      console.log("organization create result",result);
+      if(!result.errorCode&&!result.errorMessage&&result.id){
+        that.updateOrganizations();
+        that.setState({
+          organization:result.id.toString()
         });
       }
     });
@@ -276,6 +298,13 @@ export default class KeyManage extends Component {
       apikeys: one
     });
     console.log("state.apikeys",one);
+  }
+
+  handleOrgNameChange(event) {
+      let name = event.target.value;
+      this.setState({
+          organizationname: name
+      });
   }
 
   render() {
@@ -411,6 +440,25 @@ export default class KeyManage extends Component {
               primary={true}
               onClick={this.createApiKey}
               label="Create New API Key"
+          />
+          <label>
+              <TextField
+                  type="text"
+                  name="neworg"
+                  style={textFieldStyle}
+                  errorText={this.state.errors.neworg}
+                  floatingLabelText="New Organization Name"
+                  value={this.state.organizationname}
+                  onChange={this.handleOrgNameChange}
+              />
+          </label>
+          <RaisedButton
+              style={{
+                  marginTop: "1em",
+              }}
+              primary={true}
+              onClick={this.createOrganization}
+              label="Create New Organization"
           />
       </form>
       <div className="results">

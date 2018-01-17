@@ -26,6 +26,19 @@ export const endpoints = {
       });
     }
   ),
+  "create_organization": new Endpoint(
+    "POST", "/auth/admin/create-organization",
+    undefined,
+    new Headers({
+        "Content-Type": "application/json",
+    }),
+    (args) => {
+      return JSON.stringify({
+        "name":args.name,
+        "created":args.created
+      });
+    }
+  ),
   "update_key": new Endpoint(
     "POST","/auth/admin/update-apikey",
     undefined,

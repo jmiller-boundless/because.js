@@ -129,6 +129,54 @@ export function parse_wrapped_key(response: Response): ApiKey {
         );
 }
 
+export function parse_wrapped_organization(response: Response): Organization{
+  const data = parse_response<WrappedOrganization>(response);
+  const members = [];
+  for (const memberdata of data.value.members) {
+      const memberroles = [];
+      for(const memberrole of memberdata.roles){
+        const role = new UserRole(memberrole.id,memberrole.key,memberrole.description);
+        memberroles.push(role);
+      }
+      const member = new User(memberdata.id,memberdata.email,memberroles,memberdata.created,memberdata.parentOrganizationId);
+      members.push(member);
+  }
+
+  const administrators = [];
+  for (const administordata of data.value.administrators) {
+      const adminroles = [];
+      for(const adminrole of administordata.roles){
+        const role = new UserRole(adminrole.id,adminrole.key,adminrole.description);
+        adminroles.push(role);
+      }
+      const administrator = new User(administordata.id,administordata.email,adminroles,administordata.created,administordata.parentOrganizationId);
+      administrators.push(administrator);
+  }
+
+  const apiKeys = [];
+  for (const apikeydata of data.value.apiKeys){
+    const roles = [];
+    for (const role_data of apikeydata.authorizedRoles) {
+        const role = new UserRole(role_data.id,role_data.key,role_data.description);
+        roles.push(role);
+    }
+    const key = new ApiKey(
+      apikeydata.id,apikeydata.key,apikeydata.created,apikeydata.expires,roles,apikeydata.parentOrganizationId,apikeydata.errorCode,apikeydata.errorMessage);
+    apiKeys.push(key);
+  }
+  return new Organization(
+    data.value.id,
+    data.value.name,
+    data.value.created,
+    members,
+    administrators,
+    apiKeys,
+    data.errorCode,
+    data.errorMessage
+  );
+
+}
+
 export function parse_key_validate(response: Response): KeyValidateData {
     const data = parse_response<KeyValidateData>(response);
     // The envelope is irrelevant after we've checked for an error
