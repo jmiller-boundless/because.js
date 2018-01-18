@@ -221,7 +221,8 @@ export default class KeyManage extends Component {
   }
   handleOrganizationChange(event, index, selected) {
       this.setState({
-          organization: selected
+          organization: selected,
+          apikey: ""
       });
       this.updateApiKeys(selected);
       this.updateRoles();
@@ -273,19 +274,26 @@ export default class KeyManage extends Component {
       let bcs = this.props.bcs;
       let promise = bcs.keys.get_organizations();
       let keyhldr = [];
+      let that = this;
       promise.then((result) => {
+          console.log("updateorg result",result);
           const one = {};
           for (let record of result) {
             one[record.id] = record.name;
-            keyhldr.push(...record.apiKeys)
+            console.log("record.apikeys",record.apiKeys);
+            keyhldr.push(...record.apiKeys);
           }
           one["ALL"] = "Any";
           console.log("one: ", one);
+          console.log("keyhldr",keyhldr);
           this.setState({
               organizations: one,
               keydata: keyhldr,
               organizationdata: result
           });
+          console.log("before updateapikeys call");
+          that.updateApiKeys(this.state.organization);
+          console.log("after updateapikeys call");
       });
   }
   updateApiKeys(organizationid){
