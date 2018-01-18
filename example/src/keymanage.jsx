@@ -6,6 +6,7 @@ import {List,ListItem} from 'material-ui/List';
 import Moment from 'moment';
 import NumberInput from 'material-ui-number-input';
 import TextField from 'material-ui/TextField';
+import DatePicker from 'material-ui/DatePicker';
 import { textFieldStyle } from './styles';
 
 function dedupe(items) {
@@ -118,7 +119,8 @@ export default class KeyManage extends Component {
           rolesItems: [],
           expireunit:"",
           expirequant:"1",
-          organizationname:""
+          organizationname:"",
+          keyexpire:{}
       };
       // Ensure handle* methods have the right `this`
       this.handleTextChange = this.handleTextChange.bind(this);
@@ -135,6 +137,7 @@ export default class KeyManage extends Component {
       this.onError = this.onError.bind(this);
       this.createOrganization = this.createOrganization.bind(this);
       this.handleOrgNameChange = this.handleOrgNameChange.bind(this);
+      this.handleExpireDateChange = this.handleExpireDateChange.bind(this);
   }
 
   onError = (error) => {
@@ -227,10 +230,34 @@ export default class KeyManage extends Component {
       this.updateApiKeys(selected);
       this.updateRoles();
   }
+  daysBetween(date1, date2){
+      //Get 1 day in milliseconds
+    var one_day=1000*60*60*24;
+
+    // Convert both dates to milliseconds
+    var date1_ms = date1.getTime();
+    var date2_ms = date2.getTime();
+
+    // Calculate the difference in milliseconds
+    var difference_ms = date2_ms - date1_ms;
+
+    // Convert back to days and return
+    return Math.round(difference_ms/one_day);
+  }
   handleApiKeyChange(event, index, selected) {
       console.log("hakc selected",selected);
+      const keysel = this.state.keydata.filter(key => key.id.toString()===selected);
+      const keyroles = keysel[0].authorizedRoles.map(ar=>{
+        return ar.key;
+      });
+      const expiredate = new Date(keysel[0].expires);
+      const expirequant = this.daysBetween(new Date(),expiredate).toString();
       this.setState({
-          apikey: selected
+          apikey: selected,
+          multiroles: keyroles,
+          keyexpire: expiredate,
+          expireunit: "DAY",
+          expirequant: expirequant
       });
   }
   handleExpireUnitChange(event, index, selected) {
@@ -254,6 +281,15 @@ export default class KeyManage extends Component {
   handleSubmit(event) {
       // Don't cause whole page refresh on errors.
       event.preventDefault();
+  }
+
+  handleExpireDateChange(event,date){
+    const expirequant = this.daysBetween(new Date(),date).toString();
+    this.setState({
+      keyexpire:date,
+      expireunit: "DAY",
+      expirequant: expirequant
+    });
   }
 
   updateRoles(){
@@ -433,7 +469,7 @@ export default class KeyManage extends Component {
                   id="expirequant"
                   value={this.state.expirequant}
                   min={1}
-                  max={100}
+                  max={10000}
                   strategy="warn"
                   onError={this.onError}
                   errorText={this.state.error.message}
@@ -441,6 +477,12 @@ export default class KeyManage extends Component {
            />
                   Expire Quantity
           </label>
+          <DatePicker
+            autoOk={this.state.autoOk}
+            floatingLabelText="Expire Date"
+            value={this.state.keyexpire}
+            onChange={this.handleExpireDateChange}
+          />
           <RaisedButton
               style={{
                   marginTop: "1em",

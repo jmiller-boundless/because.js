@@ -83,5 +83,18 @@ export class KeyFrontend extends ServiceFrontend {
 
     }
 
+    async update_key(id: string,expirequantity: number,expireunit: string,roles: string){
+      const endpoint = this.service.endpoint("update_key");
+      const request = endpoint.request(this.host.url,{
+        "id":id,
+        "expireQuantity":expirequantity,
+        "expireUnit":expireunit,
+        "roles":roles
+      });
+
+      const response = await this.send(request);
+      return parse_wrapped_key(response);
+    }
+
 
 }

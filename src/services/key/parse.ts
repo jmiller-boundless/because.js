@@ -109,6 +109,17 @@ export class WrappedKey{
   }
 }
 
+export class UpdateApiKeyRequest{
+  constructor(
+    public id: number,
+    public expireQuantity: number,
+    public roles: String[]| undefined,
+    public expireUnit: String
+  ){
+
+  }
+}
+
 export function parse_wrapped_key(response: Response): ApiKey {
     const data = parse_response<WrappedKey>(response);
     const roles = [];
