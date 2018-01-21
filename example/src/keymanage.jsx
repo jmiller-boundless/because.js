@@ -138,6 +138,7 @@ export default class KeyManage extends Component {
       this.createOrganization = this.createOrganization.bind(this);
       this.handleOrgNameChange = this.handleOrgNameChange.bind(this);
       this.handleExpireDateChange = this.handleExpireDateChange.bind(this);
+      this.editApiKey = this.editApiKey.bind(this);
   }
 
   onError = (error) => {
@@ -184,6 +185,27 @@ export default class KeyManage extends Component {
     let that = this;
     let bcs = this.props.bcs;
     let promise = bcs.keys.create_key(orgid,parseInt(expirequantity,10),expireunit,roles);
+    promise.then((result) => {
+      console.log("key create result",result);
+      if(!result.errorCode&&!result.errorMessage&&result.key){
+        that.updateOrganizations();
+        that.setState({
+          organization:result.parentOrganizationId.toString(),
+          apikey:result.id.toString()
+        });
+      }
+    });
+  }
+
+  editApiKey(){
+    console.log("editing key function");
+    const keyid = this.state.apikey;
+    const expirequantity = this.state.expirequant;
+    const expireunit = this.state.expireunit;
+    const roles = this.state.multiroles.join();
+    let that = this;
+    let bcs = this.props.bcs;
+    let promise = bcs.keys.update_key(keyid,parseInt(expirequantity,10),expireunit,roles);
     promise.then((result) => {
       console.log("key create result",result);
       if(!result.errorCode&&!result.errorMessage&&result.key){
@@ -490,6 +512,14 @@ export default class KeyManage extends Component {
               primary={true}
               onClick={this.createApiKey}
               label="Create New API Key"
+          />
+          <RaisedButton
+              style={{
+                  marginTop: "1em",
+              }}
+              primary={true}
+              onClick={this.editApiKey}
+              label="Submit Edits To API Key"
           />
           <label>
               <TextField

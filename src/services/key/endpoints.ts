@@ -42,7 +42,9 @@ export const endpoints = {
   "update_key": new Endpoint(
     "POST","/auth/admin/update-apikey",
     undefined,
-    undefined,
+    new Headers({
+        "Content-Type": "application/json",
+    }),
     (args) =>{
       return JSON.stringify({
         "id":args.id,

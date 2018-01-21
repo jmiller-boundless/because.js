@@ -1371,6 +1371,27 @@ var KeyFrontend = (function (_super) {
             });
         });
     };
+    KeyFrontend.prototype.update_key = function (id, expirequantity, expireunit, roles) {
+        return __awaiter(this, void 0, void 0, function () {
+            var endpoint, request, response;
+            return __generator(this, function (_a) {
+                switch (_a.label) {
+                    case 0:
+                        endpoint = this.service.endpoint("update_key");
+                        request = endpoint.request(this.host.url, {
+                            "id": id,
+                            "expireQuantity": expirequantity,
+                            "expireUnit": expireunit,
+                            "roles": roles
+                        });
+                        return [4, this.send(request)];
+                    case 1:
+                        response = _a.sent();
+                        return [2, parse_1.parse_wrapped_key(response)];
+                }
+            });
+        });
+    };
     return KeyFrontend;
 }(service_frontend_1.ServiceFrontend));
 exports.KeyFrontend = KeyFrontend;
@@ -3035,11 +3056,13 @@ exports.endpoints = {
             "created": args.created
         });
     }),
-    "update_key": new service_1.Endpoint("POST", "/auth/admin/update-apikey", undefined, undefined, function (args) {
+    "update_key": new service_1.Endpoint("POST", "/auth/admin/update-apikey", undefined, new headers_1.Headers({
+        "Content-Type": "application/json",
+    }), function (args) {
         return JSON.stringify({
             "id": args.id,
             "expireQuantity": args.expireQuantity,
-            "roles": args.roles,
+            "roles": args.roles.toString().split(','),
             "expireUnit": args.expireUnit
         });
     }),
@@ -3159,6 +3182,16 @@ var WrappedKey = (function () {
     return WrappedKey;
 }());
 exports.WrappedKey = WrappedKey;
+var UpdateApiKeyRequest = (function () {
+    function UpdateApiKeyRequest(id, expireQuantity, roles, expireUnit) {
+        this.id = id;
+        this.expireQuantity = expireQuantity;
+        this.roles = roles;
+        this.expireUnit = expireUnit;
+    }
+    return UpdateApiKeyRequest;
+}());
+exports.UpdateApiKeyRequest = UpdateApiKeyRequest;
 function parse_wrapped_key(response) {
     var data = parse_1.parse_response(response);
     var roles = [];
