@@ -1392,6 +1392,42 @@ var KeyFrontend = (function (_super) {
             });
         });
     };
+    KeyFrontend.prototype.delete_key = function (id) {
+        return __awaiter(this, void 0, void 0, function () {
+            var endpoint, request, response;
+            return __generator(this, function (_a) {
+                switch (_a.label) {
+                    case 0:
+                        endpoint = this.service.endpoint("delete_key");
+                        request = endpoint.request(this.host.url, {
+                            "id": id
+                        });
+                        return [4, this.send(request)];
+                    case 1:
+                        response = _a.sent();
+                        return [2, response];
+                }
+            });
+        });
+    };
+    KeyFrontend.prototype.delete_organization_byid = function (id) {
+        return __awaiter(this, void 0, void 0, function () {
+            var endpoint, request, response;
+            return __generator(this, function (_a) {
+                switch (_a.label) {
+                    case 0:
+                        endpoint = this.service.endpoint("delete_organization_byid");
+                        request = endpoint.request(this.host.url, {
+                            "id": id
+                        });
+                        return [4, this.send(request)];
+                    case 1:
+                        response = _a.sent();
+                        return [2, response];
+                }
+            });
+        });
+    };
     return KeyFrontend;
 }(service_frontend_1.ServiceFrontend));
 exports.KeyFrontend = KeyFrontend;
@@ -3075,7 +3111,8 @@ exports.endpoints = {
             "name": args.name
         });
     }),
-    "get_roles": new service_1.Endpoint("GET", "/auth/admin/get-roles")
+    "get_roles": new service_1.Endpoint("GET", "/auth/admin/get-roles"),
+    "delete_key": new service_1.Endpoint("GET", "/auth/admin/delete-apikey/{id}")
 };
 
 

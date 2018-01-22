@@ -96,5 +96,23 @@ export class KeyFrontend extends ServiceFrontend {
       return parse_wrapped_key(response);
     }
 
+    async delete_key(id: number) {
+        const endpoint = this.service.endpoint("delete_key");
+        const request = endpoint.request(this.host.url, {
+            "id": id
+        });
+        const response = await this.send(request);
+        return response;
+    }
+
+    async delete_organization_byid(id: number){
+      const endpoint = this.service.endpoint("delete_organization_byid");
+      const request = endpoint.request(this.host.url,{
+        "id": id
+      });
+      const response = await this.send(request);
+      return response;
+    }
+
 
 }

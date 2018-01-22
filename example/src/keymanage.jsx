@@ -103,13 +103,11 @@ export default class KeyManage extends Component {
           },
           query: undefined,
           state: "waiting",
-          organization: "ALL",
+          organization: "",
           organizations: {
-              "ALL": "ALL",
           },
           apikey: "",
           apikeys: {
-            "ALL": "ALL"
           },
           keydata: [],
           organizationdata:[],
@@ -139,6 +137,8 @@ export default class KeyManage extends Component {
       this.handleOrgNameChange = this.handleOrgNameChange.bind(this);
       this.handleExpireDateChange = this.handleExpireDateChange.bind(this);
       this.editApiKey = this.editApiKey.bind(this);
+      this.deleteKey = this.deleteKey.bind(this);
+      this.deleteOrganization = this.deleteOrganization.bind(this);
   }
 
   onError = (error) => {
@@ -197,6 +197,23 @@ export default class KeyManage extends Component {
     });
   }
 
+  deleteKey(){
+    console.log("Deleting key functions");
+    const keyid = this.state.apikey;
+    let that = this;
+    let bcs = this.props.bcs;
+    let promise = bcs.keys.delete_key(parseInt(keyid,10));
+    promise.then((result) => {
+      console.log("key delete result",result);
+      if(!result.errorCode&&!result.errorMessage){
+        that.updateOrganizations();
+        that.setState({
+          apikey:""
+        });
+      }
+    });
+  }
+
   editApiKey(){
     console.log("editing key function");
     const keyid = this.state.apikey;
@@ -230,6 +247,23 @@ export default class KeyManage extends Component {
         that.updateOrganizations();
         that.setState({
           organization:result.id.toString()
+        });
+      }
+    });
+  }
+
+  deleteOrganization(){
+    console.log("Deleting org functions");
+    const organizationid = this.state.organization;
+    let that = this;
+    let bcs = this.props.bcs;
+    let promise = bcs.keys.delete_organization_byid(parseInt(organizationid,10));
+    promise.then((result) => {
+      console.log("org delete result",result);
+      if(!result.errorCode&&!result.errorMessage){
+        that.updateOrganizations();
+        that.setState({
+          organization:""
         });
       }
     });
@@ -341,7 +375,6 @@ export default class KeyManage extends Component {
             console.log("record.apikeys",record.apiKeys);
             keyhldr.push(...record.apiKeys);
           }
-          one["ALL"] = "Any";
           console.log("one: ", one);
           console.log("keyhldr",keyhldr);
           this.setState({
@@ -521,6 +554,14 @@ export default class KeyManage extends Component {
               onClick={this.editApiKey}
               label="Submit Edits To API Key"
           />
+          <RaisedButton
+              style={{
+                  marginTop: "1em",
+              }}
+              primary={true}
+              onClick={this.deleteKey}
+              label="Delete Selected API Key"
+          />
           <label>
               <TextField
                   type="text"
@@ -539,6 +580,14 @@ export default class KeyManage extends Component {
               primary={true}
               onClick={this.createOrganization}
               label="Create New Organization"
+          />
+          <RaisedButton
+              style={{
+                  marginTop: "1em",
+              }}
+              primary={true}
+              onClick={this.deleteOrganization}
+              label="Delete Selected Organization"
           />
       </form>
       <div className="results">

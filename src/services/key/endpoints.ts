@@ -76,6 +76,9 @@ export const endpoints = {
   ),
   "get_roles": new Endpoint(
     "GET","/auth/admin/get-roles"
+  ),
+  "delete_key": new Endpoint(
+    "GET","/auth/admin/delete-apikey/{id}"
   )
 
 
