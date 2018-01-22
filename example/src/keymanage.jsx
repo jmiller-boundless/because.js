@@ -7,6 +7,7 @@ import Moment from 'moment';
 import NumberInput from 'material-ui-number-input';
 import TextField from 'material-ui/TextField';
 import DatePicker from 'material-ui/DatePicker';
+import Snackbar from 'material-ui/Snackbar';
 import { textFieldStyle } from './styles';
 
 function dedupe(items) {
@@ -173,7 +174,11 @@ export default class KeyManage extends Component {
           errorText='';
           break;
       }
-      this.setState({ error:{message: errorText }});
+      if(errorText&&errorText.length>0)
+        this.setState({ error:{message: errorText }});
+        else {
+          this.setState({ state:"waiting"});
+        }
     };
 
   createApiKey(){
@@ -202,16 +207,25 @@ export default class KeyManage extends Component {
     const keyid = this.state.apikey;
     let that = this;
     let bcs = this.props.bcs;
-    let promise = bcs.keys.delete_key(parseInt(keyid,10));
-    promise.then((result) => {
-      console.log("key delete result",result);
-      if(!result.errorCode&&!result.errorMessage){
-        that.updateOrganizations();
-        that.setState({
-          apikey:""
-        });
-      }
-    });
+    if(!this.state.apikey||this.state.apikey.trim().length<1){
+      this.setState({
+          state: "error",
+          error: {
+              text: "Key deletion requires a selected key"
+          }
+      });
+    }else{
+      let promise = bcs.keys.delete_key(parseInt(keyid,10));
+      promise.then((result) => {
+        console.log("key delete result",result);
+        if(!result.errorCode&&!result.errorMessage){
+          that.updateOrganizations();
+          that.setState({
+            apikey:""
+          });
+        }
+      });
+    }
   }
 
   editApiKey(){
@@ -222,34 +236,52 @@ export default class KeyManage extends Component {
     const roles = this.state.multiroles.join();
     let that = this;
     let bcs = this.props.bcs;
-    let promise = bcs.keys.update_key(keyid,parseInt(expirequantity,10),expireunit,roles);
-    promise.then((result) => {
-      console.log("key create result",result);
-      if(!result.errorCode&&!result.errorMessage&&result.key){
-        that.updateOrganizations();
-        that.setState({
-          organization:result.parentOrganizationId.toString(),
-          apikey:result.id.toString()
+    if(!this.state.apikey||this.state.apikey.trim().length<1||!this.state.expirequant||this.state.expirequant.trim().length<1||isNaN(+this.state.expirequant)||!this.state.expireunit||this.state.expireunit.trim().length<1){
+      this.setState({
+          state: "error",
+          error: {
+              text: "Key editing requires a selected key, valid expire unit and valid expire quant values."
+          }
+      });
+    }else{
+        let promise = bcs.keys.update_key(keyid,parseInt(expirequantity,10),expireunit,roles);
+        promise.then((result) => {
+          console.log("key create result",result);
+          if(!result.errorCode&&!result.errorMessage&&result.key){
+            that.updateOrganizations();
+            that.setState({
+              organization:result.parentOrganizationId.toString(),
+              apikey:result.id.toString()
+            });
+          }
         });
       }
-    });
-  }
+    }
 
   createOrganization(){
     console.log("creating organization function");
     const name = this.state.organizationname;
     let that = this;
     let bcs = this.props.bcs;
-    let promise = bcs.keys.create_organization(name);
-    promise.then((result) => {
-      console.log("organization create result",result);
-      if(!result.errorCode&&!result.errorMessage&&result.id){
-        that.updateOrganizations();
-        that.setState({
-          organization:result.id.toString()
-        });
-      }
-    });
+    if(!this.state.organizationname||this.state.organizationname.trim().length<1){
+      this.setState({
+          state: "error",
+          error: {
+              text: "Organization creation requires a valid organization name"
+          }
+      });
+    }else{
+      let promise = bcs.keys.create_organization(name);
+      promise.then((result) => {
+        console.log("organization create result",result);
+        if(!result.errorCode&&!result.errorMessage&&result.id){
+          that.updateOrganizations();
+          that.setState({
+            organization:result.id.toString()
+          });
+        }
+      });
+    }
   }
 
   deleteOrganization(){
@@ -257,16 +289,25 @@ export default class KeyManage extends Component {
     const organizationid = this.state.organization;
     let that = this;
     let bcs = this.props.bcs;
-    let promise = bcs.keys.delete_organization_byid(parseInt(organizationid,10));
-    promise.then((result) => {
-      console.log("org delete result",result);
-      if(!result.errorCode&&!result.errorMessage){
-        that.updateOrganizations();
-        that.setState({
-          organization:""
-        });
-      }
-    });
+    if(!this.state.organizationid||this.state.organizationid.trim().length<1){
+      this.setState({
+          state: "error",
+          error: {
+              text: "Organization deletion requires a selected organization"
+          }
+      });
+    }else{
+      let promise = bcs.keys.delete_organization_byid(parseInt(organizationid,10));
+      promise.then((result) => {
+        console.log("org delete result",result);
+        if(!result.errorCode&&!result.errorMessage){
+          that.updateOrganizations();
+          that.setState({
+            organization:""
+          });
+        }
+      });
+    }
   }
 
   handleTextChange(event) {
@@ -588,6 +629,11 @@ export default class KeyManage extends Component {
               primary={true}
               onClick={this.deleteOrganization}
               label="Delete Selected Organization"
+          />
+          <Snackbar
+              open={this.state.state === "error"}
+              message={`Error submitting changes: ${this.state.error.text}`}
+              autoHideDuration={4000}
           />
       </form>
       <div className="results">
