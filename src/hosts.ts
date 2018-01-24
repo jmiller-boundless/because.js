@@ -10,7 +10,7 @@ export {
 
 export const urls: {[env: string]: URL} = {
     "dev": "https://saasy.boundlessgeo.io",
-    "test": "https://saasy.boundlessgeo.io",
+    "test": "http://saasy.boundlessgeo.io",
     "prod": "https://saasy.boundlessgeo.io",
     "local": "http://localhost:8000",
 };

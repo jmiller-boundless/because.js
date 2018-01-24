@@ -40,6 +40,7 @@ export function parse_response<T extends MayHaveError>(response: Response): T {
         throw new Error("no response");
     }
     if (!response.body) {
+        console.log("response no body", response);
         throw new Error("response has no body");
     }
     if (response.status < 200 || response.status > 299) {

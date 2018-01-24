@@ -2661,6 +2661,7 @@ var Frontend = (function () {
             : new query_1.Query());
         if (this.key) {
             enriched.set("apikey", this.key.key);
+            enriched.set("version", "0.1");
         }
         return enriched;
     };
@@ -2725,7 +2726,7 @@ var host_1 = __webpack_require__(16);
 exports.Host = host_1.Host;
 exports.urls = {
     "dev": "https://saasy.boundlessgeo.io",
-    "test": "https://saasy.boundlessgeo.io",
+    "test": "http://saasy.boundlessgeo.io",
     "prod": "https://saasy.boundlessgeo.io",
     "local": "http://localhost:8000",
 };
