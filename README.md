@@ -217,6 +217,53 @@ If you are using ES5, you would use the promise's .then() method instead of
 
 
 ### Key Management
+#### Data Types
+
+````
+Organization
+(
+    public id: number,
+    public name: string,
+    public created: number,
+    public members: User[],
+    public administrators: User[],
+    public apiKeys: ApiKey[],
+    public errorCode: number| undefined,
+    public errorMessage: string| undefined
+)
+
+ApiKey
+(
+      public id: number,
+      public key: string,
+      public created: number,
+      public expires: number,
+      public authorizedRoles: UserRole[],
+      public parentOrganizationId: number,
+      public errorCode: number| undefined,
+      public errorMessage: string| undefined
+ )
+ 
+ UserRole
+ (
+    public id: number,
+    public key: string,
+    public description: string
+ )
+ 
+ User
+ (
+    public id: number,
+    public email: string,
+    public roles: UserRole[],
+    public created: number,
+    public parentOrganizationId: number
+)
+ 
+ 
+
+````
+
 
 #### Get Organizations
 
