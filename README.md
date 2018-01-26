@@ -101,6 +101,12 @@ var promise = bcs.login(username, password);
 promise.then((jwt) => {
     console.log("logged in with jwt", jwt);
 });
+
+-or- you can use a key
+var promise = bcs.login(undefined, undefined,key);
+promise.then((keyvalidatedata) => {
+    console.log("logged in with key", keyvalidatedata);
+});
 ```
 
 or, if we want to dispense with the intermediate variable:
@@ -108,6 +114,12 @@ or, if we want to dispense with the intermediate variable:
 ```
 bcs.login(username, password).then((jwt) => {
     console.log("logged in with jwt", jwt);
+});
+
+-or-
+
+bcs.login(undefined, undefined,key).then((keyvalidatedata) => {
+    console.log("logged in with key", keyvalidatedata);
 });
 ```
 
@@ -119,6 +131,15 @@ bcs.login(username, password).then((jwt) => {
 }).catch((error) => {
     console.log("got an error", error);
 });
+
+-or-
+
+bcs.login(undefined, undefined,key).then((keyvalidatedata) => {
+    console.log("logged in with key", keyvalidatedata);
+}).catch((error) => {
+    console.log("got an error", error);
+});
+
 ```
 
 Since the interface returns a promise, you can also use ES2017 async/await:
@@ -128,6 +149,18 @@ async myLogin(username, password) {
     try {
         let jwt = await bcs.login(username, password);
         console.log("logged in with jwt", jwt);
+    }
+    catch (error) {
+        console.log("got an error", error);
+    }
+}
+
+-or-
+
+async myLogin(key) {
+    try {
+        let keyvalidatedata = await bcs.login(undefined, undefined,key);
+        console.log("logged in with key", keyvalidatedata);
     }
     catch (error) {
         console.log("got an error", error);
@@ -146,6 +179,12 @@ instance.
 bcs.login(username, password).then((jwt) => {
     console.log("logged in with jwt roles", bcs.jwt.roles);
     console.log("same as", jwt.roles);
+});
+
+-or-
+
+bcs.login(undefined, undefined,key).then((keyvalidatedata) => {
+    console.log("key roles", keyvalidatedata.roles);
 });
 ```
 
