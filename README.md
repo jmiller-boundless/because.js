@@ -218,6 +218,18 @@ If you are using ES5, you would use the promise's .then() method instead of
 
 ### Key Management
 
+#### Get Organizations
+
+```
+let results = await bcs.keys.get_organizations();
+```
+
+#### Get Roles
+
+```
+let results = await bcs.get_roles();
+```
+
 #### Create Key
 
 ```
@@ -236,11 +248,23 @@ const expireunit = "MONTH"; //DAY, WEEK, MONTH, YEAR
 const roles = "MAPZEN_GEOCODE,MAPBOX_ROUTE,TREND_SETTER";
 let results = await bcs.keys.update_key(keyid,expirequantity,expireunit,roles);
 ```
+#### Delete Key
+
+```
+const keyid = 67;
+let results = await bcs.keys.delete_key(keyid);
+```
 #### Create Organization
 
 ```
 const name = "Boundless";
 let results = await bcs.keys.create_organization(name);
+```
+#### Delete Organization
+
+```
+const organizationid = 67;
+let results = await bcs.keys.delete_organization_byid(organizationid);
 ```
 
 ## Example Project
