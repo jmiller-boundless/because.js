@@ -216,6 +216,33 @@ If you are using ES5, you would use the promise's .then() method instead of
 `await`.
 
 
+### Key Management
+
+#### Create Key
+
+```
+const orgid = "Boundless";
+const expirequantity = 6;
+const expireunit = "MONTH"; //DAY, WEEK, MONTH, YEAR
+const roles = "MAPZEN_GEOCODE,MAPBOX_ROUTE,TREND_SETTER";
+let results = await bcs.keys.create_key(orgid,expirequantity,expireunit,roles);
+```
+#### Edit Key
+
+```
+const orgid = "Boundless";
+const expirequantity = 6;
+const expireunit = "MONTH"; //DAY, WEEK, MONTH, YEAR
+const roles = "MAPZEN_GEOCODE,MAPBOX_ROUTE,TREND_SETTER";
+let results = await bcs.keys.update_key(keyid,expirequantity,expireunit,roles);
+```
+#### Create Organization
+
+```
+const name = "Boundless";
+let results = await bcs.keys.create_organization(name);
+```
+
 ## Example Project
 
 If you want to find some example code to look at, you can find an extended
